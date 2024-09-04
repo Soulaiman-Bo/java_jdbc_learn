@@ -13,13 +13,18 @@ public class UserDAO {
     private static final String DELETE_USER_SQL = "DELETE FROM users WHERE id = ?";
 
 
-    public void createUser(User user) {
-        try (Connection connection = DatabaseConfig.getConnection();
+    public void createUser(User user) throws SQLException {
+        Connection connection = DatabaseConfig.getConnection();
+
+        try (
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER_SQL)) {
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getEmail());
-            preparedStatement.executeUpdate();
+             preparedStatement.setString(1, user.getName());
+             preparedStatement.setString(2, user.getEmail());
+             preparedStatement.executeUpdate();
+
+            connection.commit();
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace(); // Log the exception
         }
     }
@@ -66,6 +71,7 @@ public class UserDAO {
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
+
         try (Connection connection = DatabaseConfig.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS)) {
             ResultSet rs = preparedStatement.executeQuery();
@@ -76,9 +82,11 @@ public class UserDAO {
                 String email = rs.getString("email");
                 users.add(new User(id, name, email));
             }
+
         } catch (SQLException e) {
             e.printStackTrace(); // Log the exception
         }
+
         return users;
     }
 

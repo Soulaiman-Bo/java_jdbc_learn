@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.List;
 
 public class UserService {
@@ -9,7 +10,11 @@ public class UserService {
 
     public void addUser(String name, String email) {
         User user = new User(0, name, email);
-        userDAO.createUser(user);
+        try {
+            userDAO.createUser(user);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public User getUser(int id) {
